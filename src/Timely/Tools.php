@@ -13,13 +13,6 @@ class Tools {
 	protected $time;
 
 	/**
-	 * A DateTime object in UTC Timezone
-	 *
-	 * @access protected
-	 */
-	protected $utc;
-
-	/**
 	 * Optionally set a time on creation
 	 *
 	 * @param DateTime
@@ -29,72 +22,86 @@ class Tools {
 	{
 		if( !is_null($time) )
 		{
-			$this->time($time);
+			$this->set($time);
 		}
 	}
 
 	/**
-	 * Get or Set a current time
-	 * Creates a UTC version
+	 * Set a current time
+	 * Optionally set its timezone
 	 *
 	 * @param DateTime
-	 * @return Timely\Tools|DateTime
+	 * @param Mixed 	TimeZone object or String
+	 * @return Timely\Tools
 	 */
-	public function time(DateTime $time=null)
+	public function set(DateTime $time, $timezone=null)
 	{
-		if( is_null($time) )
-		{
-			return $this->time;
-		}
-
 		$this->time = $time;
 
-		$cloned = clone $this->time;
-		$this->utc = $this->toUtc($cloned);
+		if( ! is_null($timezone) )
+		{
+			$this->time->setTimezone( $this->timezone($timezone) );
+		}
 
 		return $this;
 	}
 
 	/**
-	 * Convert time to UTC
+	 * Convert set time to different timezone
 	 *
-	 * @param DateTime
+	 * @param Mixed 	Valid timezone string or DateTimeZone object
 	 * @return DateTime
 	 */
-	public function toUtc(DateTime $time=null)
+	public function get($timezone=null)
 	{
-		if( is_null($time) && ! is_null($this->time) )
-		{
-			return $this->utc;
+		// Need a DateTime set to continue
+		if( $this->time instanceof DateTime === false) {
+			throw new \RuntimeException('No DateTime object set.');
 		}
 
-		$time->setTimezone( new DateTimeZone('UTC') );
+		// If null, return set DateTime
+		if( is_null($timezone) )
+		{
+			return $this->time;
+		}
 
-		return $time;
+		// Else, change timezone and return
+		$newtime = clone $this->time;
+
+		$newtime->setTimezone( $this->timezone($timezone) );
+
+		return $newtime;
 	}
 
 	/**
-	 * Convert from one timezone to another
+	 * Convert time to any TimeZone
 	 *
-	 * @param String 	String representation of a timezone
-	 * @param DateTime 	Optional DateTime
 	 * @return DateTime
 	 */
-	public function toTimezone($timezone, DateTime $time=null)
+	public function getUtc()
 	{
-		if( is_null($time) && ! is_null($this->time) )
-		{
-			$time = $this->time;
-		}
-
-		$time->setTimezone( new DateTimeZone($timezone) );
-
-		return $time;
+		return $this->get( new DateTimeZone('UTC') );
 	}
 
-	// Get offset from UTC
-	public function utcOffset() {}
+	/**
+	 * For any DateTimeZone setting, accept a valid
+	 * TimeZone string or DateTimeZone object
+	 *
+	 * @param Mixed 	String of TimeZone or TimeZone object
+	 * @return DateTimeZone
+	 */
+	protected function timezone($timezone)
+	{
+		if( is_string($timezone) )
+		{
+			return new DateTimeZone($timezone);
+		}
 
-	// Get offset from GMT
-	public function gmtOffset() {}
+		if( $timezone instanceof DateTimeZone )
+		{
+			return $timezone;
+		}
+
+		throw new \InvalidArgumentException('Must pass a valid timezone string or DateTimeZone object.');
+	}
 }
