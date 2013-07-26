@@ -6,6 +6,7 @@ Tools for handling time and timezones
 Master: [![Build Status](https://travis-ci.org/fideloper/Timely.png?branch=master)](https://travis-ci.org/fideloper/Timely)
 
 Develop: [![Build Status](https://travis-ci.org/fideloper/Timely.png?branch=develop)](https://travis-ci.org/fideloper/Timely)
+
 ---
 
 ## Usage
